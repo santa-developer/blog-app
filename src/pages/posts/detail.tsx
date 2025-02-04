@@ -1,7 +1,15 @@
-import React from "react";
+import Footer from "../../components/Footer";
+import Header from "../../components/Header";
+import PostDetail from "../../components/PostDetail";
 
-const Postdetail = () => {
-  return <div>Postdetail</div>;
+const PostDetailPage = () => {
+  return (
+    <>
+      <Header />
+      <PostDetail />
+      <Footer />
+    </>
+  );
 };
 
-export default Postdetail;
+export default PostDetailPage;
