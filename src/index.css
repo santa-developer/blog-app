@@ -136,12 +136,16 @@ footer a:focus {
 .post__edit {
   cursor: pointer;
 }
+.post__edit a {
+  color: gray;
+  text-decoration: none;
+}
 .post__delete:hover,
 .post__delete:focus {
   color: #333;
 }
-.post__edit:hover,
-.post__edit:focus {
+.post__edit a:hover,
+.post__edit a:focus {
   color: #333;
 }
 
