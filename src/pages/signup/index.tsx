@@ -1,7 +1,14 @@
+import Header from "components/Header";
+import SignupForm from "components/SignupForm";
 import React from "react";
 
 const SignUpPage = () => {
-  return <div>SignUpPage</div>;
+  return (
+    <>
+      <Header />
+      <SignupForm />
+    </>
+  );
 };
 
 export default SignUpPage;
