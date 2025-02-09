@@ -124,6 +124,10 @@ footer a:focus {
   color: dimgray;
 }
 
+.post__text--pre-wrap {
+  white-space: pre-wrap;
+}
+
 .post__utils-box {
   display: flex;
   flex-direction: row-reverse;
