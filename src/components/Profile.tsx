@@ -1,14 +1,18 @@
+import AuthContext from "context/AuthContext";
 import { getAuth, signOut } from "firebase/auth";
 import { app } from "firebaseApp";
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const Profile = () => {
-  const auth = getAuth(app);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  console.log(user);
 
   const logOutHandler = async () => {
     try {
+      const auth = getAuth(app);
       await signOut(auth);
       toast.success("로그아웃 되었습니다.");
       navigate("/login");
@@ -22,10 +26,8 @@ const Profile = () => {
       <div className='flex__box-lg'>
         <div className='profile__image'></div>
         <div>
-          <div className='profile__email'>{auth?.currentUser?.email}</div>
-          <div className='profile__name'>
-            {auth?.currentUser?.displayName || "사용자"}
-          </div>
+          <div className='profile__email'>{user?.email}</div>
+          <div className='profile__name'>{user?.displayName || "사용자"}</div>
         </div>
       </div>
       <div
