@@ -14,6 +14,8 @@ export interface PostProps {
   email: string;
   content: string;
   createAt: string;
+  updatedAt: string;
+  uid: string;
 }
 
 type TabType = "all" | "my";
@@ -35,7 +37,7 @@ const PostList = ({ hasNavigaion = true }: PostListProps) => {
     }
   };
 
-  console.log(posts);
+  // console.log(posts);
 
   // 페이지 렌더링 될 때 getPosts 가져오기
   useEffect(() => {
