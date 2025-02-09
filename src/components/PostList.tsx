@@ -1,6 +1,13 @@
 import { useContext, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { Link } from "react-router-dom";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  query,
+  orderBy,
+} from "firebase/firestore";
 import { db } from "firebaseApp";
 import AuthContext from "context/AuthContext";
 import { toast } from "react-toastify";
@@ -14,7 +21,7 @@ export interface PostProps {
   summary: string;
   email: string;
   content: string;
-  createAt: string;
+  createdAt: string;
   updatedAt: string;
   uid: string;
 }
@@ -25,11 +32,15 @@ const PostList = ({ hasNavigaion = true }: PostListProps) => {
   const [posts, setPosts] = useState<PostProps[]>([]);
 
   const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
 
+  // 게시글 가져오기
   const getPosts = async () => {
     try {
-      const datas = await getDocs(collection(db, "posts"));
+      // query와 orderBy를 이용하여 createdAt기준으로 데이터 정렬
+      let postsRef = collection(db, "posts");
+      let postQuery = query(postsRef, orderBy("createdAt", "asc"));
+      // 쿼리 실행하여 정렬된 데이터 가져오기
+      const datas = await getDocs(postQuery);
       const newPosts = datas.docs.map(
         (doc) => ({ ...doc.data(), id: doc.id } as PostProps)
       );
@@ -86,7 +97,7 @@ const PostList = ({ hasNavigaion = true }: PostListProps) => {
                 <div className='post__profile-box'>
                   <div className='post__profile'></div>
                   <div className='post__author-name'>{post?.email}</div>
-                  <div className='post__date'>{post?.createAt}</div>
+                  <div className='post__date'>{post?.createdAt}</div>
                 </div>
                 <div className='post__title'>{post?.title}</div>
                 <div className='post__text'>{post?.summary}</div>
