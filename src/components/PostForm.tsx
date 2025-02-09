@@ -4,12 +4,13 @@ import { db } from "firebaseApp";
 import AuthContext from "context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { PostProps } from "./PostList";
+import { CATEGORIES, CategoryType, PostProps } from "./PostList";
 
 const PostForm = () => {
   const [title, setTitle] = useState<string>("");
   const [summary, setSummary] = useState<string>("");
   const [content, setContent] = useState<string>("");
+  const [category, setCategory] = useState<CategoryType | string>("");
   const [post, setPost] = useState<PostProps | null>(null);
 
   // 게시글 생성시 유저 메일을 남겨놓기 위해 유저 정보 가져옴
@@ -21,7 +22,9 @@ const PostForm = () => {
 
   // 입력값 변경 핸들러
   const onChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const {
       target: { name, value }, // 디스트럭쳐링
@@ -35,6 +38,9 @@ const PostForm = () => {
     }
     if (name === "content") {
       setContent(value);
+    }
+    if (name === "category") {
+      setCategory(value as CategoryType);
     }
   };
 
@@ -55,6 +61,7 @@ const PostForm = () => {
             minute: "2-digit",
             second: "2-digit",
           }),
+          category: category,
         });
 
         toast?.success("게시글을 수정했습니다.");
@@ -72,6 +79,7 @@ const PostForm = () => {
           }),
           email: user?.email,
           uid: user?.uid,
+          category: category,
         });
 
         toast?.success("게시글을 생성했습니다.");
@@ -111,6 +119,7 @@ const PostForm = () => {
       setTitle(post?.title);
       setSummary(post?.summary);
       setContent(post?.content);
+      setCategory(post?.category as CategoryType);
     }
   }, [post]);
 
@@ -128,6 +137,23 @@ const PostForm = () => {
           onChange={onChange}
         />
       </div>
+      <div className='form__block'>
+        <label htmlFor='category'>카테고리</label>
+        <select
+          name='category'
+          id='category'
+          onChange={onChange}
+          defaultValue={category}
+        >
+          <option value=''>카테고리를 선택해주세요.</option>
+          {CATEGORIES?.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className='form__block'>
         <label htmlFor='summary'>요약</label>
         <input
