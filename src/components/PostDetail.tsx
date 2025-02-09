@@ -52,7 +52,7 @@ const PostDetail = () => {
           {user?.email === post?.email && (
             <div className='post__utils-box'>
               <div className='post__edit'>
-                <Link to={`/posts/edit/1`}>수정</Link>
+                <Link to={`/posts/edit/${post?.id}`}>수정</Link>
               </div>
               <div
                 className='post__delete'
