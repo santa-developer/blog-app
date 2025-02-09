@@ -7,6 +7,7 @@ import {
   doc,
   query,
   orderBy,
+  where,
 } from "firebase/firestore";
 import { db } from "firebaseApp";
 import AuthContext from "context/AuthContext";
@@ -14,6 +15,7 @@ import { toast } from "react-toastify";
 
 interface PostListProps {
   hasNavigaion?: boolean;
+  defaultTab?: TabType;
 }
 export interface PostProps {
   id: string;
@@ -27,8 +29,11 @@ export interface PostProps {
 }
 
 type TabType = "all" | "my";
-const PostList = ({ hasNavigaion = true }: PostListProps) => {
-  const [activeTab, setActiveTab] = useState<TabType>("all");
+const PostList = ({
+  hasNavigaion = true,
+  defaultTab = "all",
+}: PostListProps) => {
+  const [activeTab, setActiveTab] = useState<TabType>(defaultTab);
   const [posts, setPosts] = useState<PostProps[]>([]);
 
   const { user } = useContext(AuthContext);
@@ -38,7 +43,18 @@ const PostList = ({ hasNavigaion = true }: PostListProps) => {
     try {
       // query와 orderBy를 이용하여 createdAt기준으로 데이터 정렬
       let postsRef = collection(db, "posts");
-      let postQuery = query(postsRef, orderBy("createdAt", "asc"));
+      let postQuery;
+      if (activeTab === "my" && user) {
+        // 내 글만 필터링
+        postQuery = query(
+          postsRef,
+          where("uid", "==", user.uid),
+          orderBy("createdAt", "asc")
+        );
+      } else {
+        // 모든 글을 필터링
+        postQuery = query(postsRef, orderBy("createdAt", "asc"));
+      }
       // 쿼리 실행하여 정렬된 데이터 가져오기
       const datas = await getDocs(postQuery);
       const newPosts = datas.docs.map(
@@ -64,9 +80,11 @@ const PostList = ({ hasNavigaion = true }: PostListProps) => {
   };
 
   // 페이지 렌더링 될 때 getPosts 가져오기
+  // activeTab 이 변경될 때 마다 다시 호출해야 tab에 따라 게시글을 sort할 수 있다.
   useEffect(() => {
     getPosts();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
   return (
     <>
       {/* nav */}
