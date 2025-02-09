@@ -57,20 +57,25 @@ const PostDetail = () => {
             <div className='post__author-name'>{post?.email}</div>
             <div className='post__date'>{post?.createdAt}</div>
           </div>
-          {user?.email === post?.email && (
-            <div className='post__utils-box'>
-              <div className='post__edit'>
-                <Link to={`/posts/edit/${post?.id}`}>수정</Link>
-              </div>
-              <div
-                className='post__delete'
-                role='presentation'
-                onClick={handleDelete}
-              >
-                삭제
-              </div>
-            </div>
-          )}
+          <div className='post__utils-box'>
+            {post?.category && (
+              <div className='post__category'>{post?.category}</div>
+            )}
+            {user?.email === post?.email && (
+              <>
+                <div className='post__edit'>
+                  <Link to={`/posts/edit/${post?.id}`}>수정</Link>
+                </div>
+                <div
+                  className='post__delete'
+                  role='presentation'
+                  onClick={handleDelete}
+                >
+                  삭제
+                </div>
+              </>
+            )}{" "}
+          </div>
           <div className='post__text post__text--pre-wrap'>{post?.content}</div>
         </div>
       ) : (
