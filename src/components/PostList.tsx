@@ -7,7 +7,7 @@ import AuthContext from "context/AuthContext";
 interface PostListProps {
   hasNavigaion?: boolean;
 }
-interface PostProps {
+export interface PostProps {
   id: string;
   title: string;
   summary: string;
