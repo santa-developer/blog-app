@@ -1,16 +1,21 @@
-import React, { useContext, useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
+import React, { useContext, useEffect, useState } from "react";
+import { collection, addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "firebaseApp";
 import AuthContext from "context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { PostProps } from "./PostList";
 
 const PostForm = () => {
   const [title, setTitle] = useState<string>("");
   const [summary, setSummary] = useState<string>("");
   const [content, setContent] = useState<string>("");
+  const [post, setPost] = useState<PostProps | null>(null);
+
   // 게시글 생성시 유저 메일을 남겨놓기 위해 유저 정보 가져옴
   const { user } = useContext(AuthContext);
+  // 게시글 수정을 위해 useParams 통해 id 추출
+  const params = useParams();
 
   const navigate = useNavigate();
 
@@ -38,22 +43,68 @@ const PostForm = () => {
     e.preventDefault(); // 기본 동작을 하지 않도록
 
     try {
-      //firebase로 posts 라는 이름으로 데이터 생성
-      await addDoc(collection(db, "posts"), {
-        title: title,
-        summary: summary,
-        content: content,
-        createdAt: new Date()?.toLocaleDateString(),
-        email: user?.email,
-      });
+      if (post && post?.id) {
+        // 게시글이 있다면 firestore 통해 데이터 수정
+        const postRef = doc(db, "posts", post?.id);
+        await updateDoc(postRef, {
+          title: title,
+          summary: summary,
+          content: content,
+          updatedAt: new Date()?.toLocaleDateString(),
+        });
 
-      toast?.success("게시글을 생성했습니다.");
-      navigate("/");
+        toast?.success("게시글을 수정했습니다.");
+        navigate(`/posts/${post?.id}`);
+      } else {
+        //게시글이 없다면 firebase로 posts 라는 이름으로 데이터 생성
+        await addDoc(collection(db, "posts"), {
+          title: title,
+          summary: summary,
+          content: content,
+          createdAt: new Date()?.toLocaleDateString(),
+          email: user?.email,
+          uid: user?.uid,
+        });
+
+        toast?.success("게시글을 생성했습니다.");
+        navigate("/");
+      }
     } catch (error: any) {
       toast?.error(error?.code);
       console.log(error);
     }
   };
+
+  // 게시글 수정일 경우 게시글 가져오기 (PostDeatil.tsx 페이지와 동일)
+  const getPosts = async (id: string) => {
+    try {
+      if (id) {
+        const docRef = doc(db, "posts", id);
+        const docSnap = await getDoc(docRef);
+
+        setPost({ ...docSnap.data(), id: docSnap.id } as PostProps);
+
+        console.log(docSnap.data());
+      }
+    } catch (e) {
+      console.error("게시글을 불러오는 중 오류가 발생했습니다.:", e);
+    }
+  };
+
+  // 페이지가 마운트 될 때마다 document를 가져오는 함수를 실행
+  useEffect(() => {
+    // params의 ID 값이 있을 때만 getPosts 호출을 해야 한다.
+    if (params?.id) getPosts(params?.id);
+  }, [params?.id]);
+
+  // post가 있으면 form 필드에 값을 넣어 줌
+  useEffect(() => {
+    if (post) {
+      setTitle(post?.title);
+      setSummary(post?.summary);
+      setContent(post?.content);
+    }
+  }, [post]);
 
   return (
     // <form action='/post' method='POST' className='form'>
@@ -91,7 +142,11 @@ const PostForm = () => {
         ></textarea>
       </div>
       <div className='form__block'>
-        <input type='submit' value='제출' className='form__btn--submit' />
+        <input
+          type='submit'
+          value={post ? "수정" : "생성"}
+          className='form__btn--submit'
+        />
       </div>
     </form>
   );
