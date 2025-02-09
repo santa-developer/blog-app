@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { Link, useNavigate } from "react-router-dom";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "firebaseApp";
 import AuthContext from "context/AuthContext";
+import { toast } from "react-toastify";
 
 interface PostListProps {
   hasNavigaion?: boolean;
@@ -24,6 +25,7 @@ const PostList = ({ hasNavigaion = true }: PostListProps) => {
   const [posts, setPosts] = useState<PostProps[]>([]);
 
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const getPosts = async () => {
     try {
@@ -38,6 +40,17 @@ const PostList = ({ hasNavigaion = true }: PostListProps) => {
   };
 
   // console.log(posts);
+
+  // 게시글 삭제하기
+  const handleDelte = async (id: string) => {
+    const confirm = window.confirm("게시글을 삭제하시겠습니까?");
+    if (confirm && id) {
+      await deleteDoc(doc(db, "posts", id));
+      toast.success("게시글을 삭제했습니다.");
+
+      getPosts(); // 게시글 리스트 새로 호출
+    }
+  };
 
   // 페이지 렌더링 될 때 getPosts 가져오기
   useEffect(() => {
@@ -80,7 +93,13 @@ const PostList = ({ hasNavigaion = true }: PostListProps) => {
               </Link>
               {user?.email === post?.email && (
                 <div className='post__utils-box'>
-                  <div className='post__delete'>삭제</div>
+                  <div
+                    className='post__delete'
+                    role='presentation'
+                    onClick={async () => handleDelte(post.id as string)}
+                  >
+                    삭제
+                  </div>
                   <div className='post__edit'>
                     <Link to={`/posts/edit/${post?.id}`}>수정</Link>
                   </div>

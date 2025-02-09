@@ -1,13 +1,15 @@
-import { Link, useParams } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
 import { PostProps } from "./PostList";
 import { db } from "firebaseApp";
 import Loader from "./Loader";
 import AuthContext from "context/AuthContext";
+import { toast } from "react-toastify";
 
 const PostDetail = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const params = useParams();
   // console.log(params?.id); // id 잘 넘어오는지 확인
 
@@ -30,8 +32,14 @@ const PostDetail = () => {
   };
 
   // 삭제 이벤트
-  const handleDelete = () => {
-    console.log("delete!");
+  const handleDelete = async () => {
+    const confirm = window.confirm("게시글을 삭제하시겠습니까?");
+    if (confirm && post) {
+      await deleteDoc(doc(db, "posts", post.id));
+      toast.success("게시글을 삭제했습니다.");
+
+      navigate("/");
+    }
   };
 
   // 페이지가 마운트 될 때마다 document를 가져오는 함수를 실행
