@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 
 interface PostListProps {
   hasNavigaion?: boolean;
-  defaultTab?: TabType;
+  defaultTab?: TabType | CategoryType;
 }
 export interface PostProps {
   id: string;
@@ -26,14 +26,20 @@ export interface PostProps {
   createdAt: string;
   updatedAt: string;
   uid: string;
+  category?: CategoryType;
 }
+
+export type CategoryType = "FE" | "BE" | "WEB" | "APP";
+export const CATEGORIES: CategoryType[] = ["FE", "BE", "WEB", "APP"];
 
 type TabType = "all" | "my";
 const PostList = ({
   hasNavigaion = true,
   defaultTab = "all",
 }: PostListProps) => {
-  const [activeTab, setActiveTab] = useState<TabType>(defaultTab);
+  const [activeTab, setActiveTab] = useState<TabType | CategoryType>(
+    defaultTab
+  );
   const [posts, setPosts] = useState<PostProps[]>([]);
 
   const { user } = useContext(AuthContext);
@@ -51,9 +57,16 @@ const PostList = ({
           where("uid", "==", user.uid),
           orderBy("createdAt", "asc")
         );
-      } else {
+      } else if (activeTab === "all") {
         // 모든 글을 필터링
         postQuery = query(postsRef, orderBy("createdAt", "asc"));
+      } else {
+        //카테고리 글 보여주기
+        postQuery = query(
+          postsRef,
+          where("category", "==", activeTab),
+          orderBy("createdAt", "asc")
+        );
       }
       // 쿼리 실행하여 정렬된 데이터 가져오기
       const datas = await getDocs(postQuery);
@@ -104,6 +117,18 @@ const PostList = ({
           >
             내 글
           </div>
+          {CATEGORIES?.map((category) => (
+            <div
+              key={category}
+              role='presentation'
+              onClick={() => setActiveTab(category)}
+              className={
+                activeTab === category ? "post__navigation--active" : ""
+              }
+            >
+              {category}
+            </div>
+          ))}
         </div>
       )}
       <div className='post__list'>
