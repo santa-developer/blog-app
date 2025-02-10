@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Router from "./components/Router";
 import { app } from "firebaseApp";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ToastContainer } from "react-toastify";
 import Loader from "components/Loader";
+import ThemeContext from "context/ThemeContext";
 
 function App() {
   const auth = getAuth(app);
@@ -14,6 +15,8 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
     !!auth?.currentUser
   );
+
+  const context = useContext(ThemeContext);
 
   // currentUser 값이 실시간으로 업데이트
   useEffect(() => {
@@ -32,10 +35,10 @@ function App() {
     });
   }, [auth]);
   return (
-    <>
+    <div className={context.theme === "light" ? "white" : "dark"}>
       <ToastContainer />
       {init ? <Router isAuthenticated={isAuthenticated} /> : <Loader />}
-    </>
+    </div>
   );
 }
 
