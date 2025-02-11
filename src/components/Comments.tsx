@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
-import { PostProps } from "./PostList";
-import { arrayUnion, doc, updateDoc } from "firebase/firestore";
+import { CommentsInterface, PostProps } from "./PostList";
+import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { db } from "firebaseApp";
 import AuthContext from "context/AuthContext";
 import { toast } from "react-toastify";
@@ -63,6 +63,23 @@ const Comments = ({ post, getPosts }: CommentProps) => {
       console.log(e);
     }
   };
+
+  //  댓글 삭제 이벤트
+  const handleDelete = async (data: CommentsInterface) => {
+    const confirm = window.confirm("댓글을 삭제하시겠습니까?");
+
+    if (confirm && post.id) {
+      const postRef = doc(db, "posts", post?.id);
+      // 댓글은 게시글에 배열형태로 데이터가 업데이트 되는 것이기 때문에
+      // 삭제할 때 updateDoc 으로 호출
+      await updateDoc(postRef, {
+        comments: arrayRemove(data),
+      });
+
+      toast.success("댓글이 삭제되었습니다.");
+      getPosts(post?.id);
+    }
+  };
   return (
     <div className='comments'>
       <form onSubmit={onSubmit} className='comments__form'>
@@ -94,7 +111,15 @@ const Comments = ({ post, getPosts }: CommentProps) => {
               <div className='comment__profile-box'>
                 <div className='comment__email'>{comment?.email}</div>
                 <div className='cooment__date'>{comment?.createdAt}</div>
-                <div className='comment__delete'>삭제</div>
+                {user?.uid === comment.uid && (
+                  <div
+                    className='comment__delete'
+                    role='presentation'
+                    onClick={() => handleDelete(comment)}
+                  >
+                    삭제
+                  </div>
+                )}
               </div>
               <div className='comment__text'>{comment?.content}</div>
             </div>
